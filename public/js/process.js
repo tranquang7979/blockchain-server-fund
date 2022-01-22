@@ -1,5 +1,5 @@
 const web3 = new Web3(window.ethereum);
-const contract_Address = "0xC2F2766186D7e6e474Ab41B147973E1b18BcAa00";
+const contract_Address = "0xc6536a42a6C585e960785521e098A7311248Be08";
 const contract_ABI = [
 	{
 		"inputs": [],
@@ -115,9 +115,10 @@ const contract_ABI = [
 const contract_MM = web3.eth.Contract(contract_ABI, contract_Address);
 console.log(contract_MM);
 
+var currentAccount = null;
+
 $(document).ready(function () {
 
-    var currentAccount = null;
     check_Metamask();
 
     getETH(contract_Address).then((data) => {
@@ -129,6 +130,25 @@ $(document).ready(function () {
             updateAccount(data[0]);
         });
     });
+
+	$("#btnDeposit").click(function() {
+		if(currentAccount != null){ // check user logged in or not
+			var txtName = $("#txtUsername").val();
+			var txtAmount = $("#txtAmount").val();
+
+			// send() => gọi hàm mất tiền, cần biết WHO đang chạy và HOW MUCH.
+			// call() => gọi hàm ko mất tiền. (view returns...)
+			contract_MM.methods.Deposit(txtName).send({
+				from: currentAccount,
+				value: web3.utils.toWei(txtAmount, "ether")
+			})
+			.then((data) => {console.log(data);})
+			.catch((error) => {console.log(error);});
+		}
+		else{
+			alert("Please login MetaMask. Thank you!");
+		}
+	});
 
 });
 
