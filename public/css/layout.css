@@ -1,2 +1,3 @@
 body{background-color: aliceblue;}
 #header, h3, #members, #frmDeposit{text-align: center;}
+#list{margin:auto;margin-top: 50px;}

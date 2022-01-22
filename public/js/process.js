@@ -1,119 +1,31 @@
+const { default: Web3 } = require("web3");
+
 const web3 = new Web3(window.ethereum);
-const contract_Address = "0xc6536a42a6C585e960785521e098A7311248Be08";
-const contract_ABI = [
-	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "user",
-				"type": "string"
-			}
-		],
-		"name": "Deposit",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "ListDeposit",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "_Address",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_Money",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "_Name",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "MembersCounter",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "ordering",
-				"type": "uint256"
-			}
-		],
-		"name": "getMember",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "masterAddress",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "withdraw",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	}
-];
+const contract_Address = "0xd74CfFb093822DA8d7BcA0c5D222E8f9C4a148D5";
+const contract_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_address","type":"address"},{"indexed":false,"internalType":"uint256","name":"_amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"_name","type":"string"}],"name":"NewDepositCome","type":"event"},{"inputs":[{"internalType":"string","name":"user","type":"string"}],"name":"Deposit","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"MembersCounter","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"ordering","type":"uint256"}],"name":"getMember","outputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"masterAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
 
 const contract_MM = web3.eth.Contract(contract_ABI, contract_Address);
 console.log(contract_MM);
+
+// Infura
+var provider = new Web3.providers.WebsocketProvider("wss://mainnet.infura.io/ws/v3/434c6924206f45d196c449c820858fdf");
+var web3_infura = new Web3(provider);
+const contract_Infura = web3_infura.eth.Contract(contract_ABI, contract_Address);
+contract_Infura.events.NewDepositCom({
+		filter:{},
+		fromBlock: "latest"
+	},
+	function(error, data){	
+		var eth = web3.utils.fromWei(web3.utils.hexToNumberString(data.returnValue[1], "eth"));	
+		$("#list").append(`
+		<tr>
+			<td>`+data.returnValue[0]+`</td>
+			<td>`+data.returnValue[2]+`</td>
+			<td>`+eth+`</td>
+		</tr>
+		`);
+	}
+); // receive data from the emit function on the contract
 
 var currentAccount = null;
 
@@ -124,6 +36,8 @@ $(document).ready(function () {
     getETH(contract_Address).then((data) => {
         $("#total").html(data);
     });
+
+	loadMembers();
 
     $("#btn_connect_MM").click(function () {
         connect_Metamask().then((data) => {
@@ -151,6 +65,30 @@ $(document).ready(function () {
 	});
 
 });
+
+function loadMembers(){
+	contract_MM.methods.MembersCounter().call()
+	.then((total) => {
+		console.log(total);
+		var number = web3.utils.hexToNumberString(total);
+		if(number > 0){
+			for(var count = 0; count < number; count++){
+				contract_MM.methods.getMember(count).call()
+				.then((member) => {
+					var eth = web3.utils.fromWei(web3.utils.hexToNumberString(member[1], "eth"));
+					$("#list").append(`
+					<tr>
+						<td>`+member[0]+`</td>
+						<td>`+member[2]+`</td>
+						<td>`+eth+`</td>
+					</tr>
+					`);
+				});
+			}
+		}
+	})
+	.catch();
+}
 
 function updateAccount(data){
     currentAccount = data;
