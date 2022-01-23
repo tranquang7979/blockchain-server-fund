@@ -8,7 +8,7 @@ Deposit Fund
 https://ropsten.etherscan.io/address/0xc6536a42a6C585e960785521e098A7311248Be08#code
 
 Deposit Fund + Infura (socket)
-https://rinkeby.etherscan.io/address/0x519aac77424f8cbc7c76c80072357ac827da2706#code
+https://rinkeby.etherscan.io/address/0x991a3f161a195572178bbd681bdd0e03f59c5561#code
 
 ====================================================================================
 # status of contract
@@ -23,7 +23,7 @@ https://rinkeby.etherscan.io/address/0x519aac77424f8cbc7c76c80072357ac827da2706#
     + click button Deploy
 3. for review => go to https://rinkeby.etherscan.io/tx/[copy and paste address of contract]    
 4. verify and publish
-    + go to https://rinkeby.etherscan.io/address/[copy and paste address of contract]
+    + go to "To:" and click link of address
     + click on tab Contract
     + click Verify and Publish and do step 5.
 5. key in contract information for verify
